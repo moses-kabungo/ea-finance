@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Currency } from 'src/models/currency.model';
 import { CurrencyPipe } from '@angular/common';
+import { CurrencyInputComponent } from 'src/components';
 
 @Component({
   selector: 'app-root',
@@ -40,13 +41,17 @@ export class AppComponent {
     }
   ];
 
+  @ViewChild(CurrencyInputComponent)
+  currencyInput: CurrencyInputComponent;
+
   currentSelection: Currency = this.currencies[0];
 
   _amount: string;
 
   onSelectionChange(currency: Currency) {
     this.currentSelection = currency;
-    console.log(this.currentSelection);
+    this.currencyInput.symbol = currency.symbol;
+    this.currencyInput.asYouTypeUp();
   }
 
   set amount(amt: string) {
