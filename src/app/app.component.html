@@ -7,19 +7,11 @@
     [selectedCurrency]="currentSelection"
     (selectionChange)="onSelectionChange($event)"
   ></currency-chooser>
-  <input
-    #in
-    type="text"
-    min="0"
-    class="amount"
-    id="curr_amount"
-    spellcheck="false"
-    autocomplete="false"
-    (focusin)="in.setSelectionRange(0, in.value.length)"
-    (keydown)="asYouType($event.key)"
-    [placeholder]="currentSelection.name"
+  <currency-input
+    [classList]="['amount']"
     [(ngModel)]="amount"
-  />
+    [symbol]="currentSelection.symbol"
+  ></currency-input>
 
   <ul class="results">
     <li class="EUR">

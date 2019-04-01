@@ -6,11 +6,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   HostListener
-} from "@angular/core";
-import { Currency } from "src/models/currency.model";
+} from '@angular/core';
+import { Currency } from 'src/models/currency.model';
 
 @Component({
-  selector: "currency-chooser",
+  selector: 'currency-chooser',
   template: `
     <ul
       class="currencies"
@@ -27,7 +27,7 @@ import { Currency } from "src/models/currency.model";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CurrencyChooserComponent {
-  private _opened: boolean = false;
+  private _opened = false;
   private _currencies: Currency[];
   private _selectedCurrency: Currency;
 
@@ -91,7 +91,7 @@ export class CurrencyChooserComponent {
     );
   }
 
-  @HostListener("body:click", ["$event.target"])
+  @HostListener('body:click', ['$event.target'])
   closeCurrencies(target: HTMLElement) {
     if (this._opened && target.nodeName.toLowerCase() !== 'li') {
       this.opened = false;
