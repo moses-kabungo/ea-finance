@@ -1,0 +1,54 @@
+<div class="wrapper">
+  <p class="instructions">
+    Enter any numeric amount and select a currency from the dropdown menu
+  </p>
+  <currency-chooser
+    [currencies]="currencies"
+    [selectedCurrency]="currentSelection"
+    (selectionChange)="onSelectionChange($event)"
+  ></currency-chooser>
+  <currency-input
+    [classList]="['amount']"
+    [(ngModel)]="amount"
+    [symbol]="currentSelection.symbol"
+  ></currency-input>
+
+  <ul class="results">
+    <li class="EUR">
+      <span class="name">Euro</span><span class="iso">EUR</span
+      ><span class="result text-right">0</span>
+    </li>
+    <li class="USD">
+      <span class="name">US Dollar</span><span class="iso">USD</span
+      ><span class="result">0</span>
+    </li>
+    <li class="GBP">
+      <span class="name">Great Britain Pound</span><span class="iso">GBP</span
+      ><span class="result">0</span>
+    </li>
+    <li class="JPY">
+      <span class="name">Japanese Yen</span><span class="iso">JPY</span
+      ><span class="result">0</span>
+    </li>
+    <li class="AUD">
+      <span class="name">Australian Dollar</span><span class="iso">AUD</span
+      ><span class="result">0</span>
+    </li>
+    <li class="CHF">
+      <span class="name">Swiss Franc</span><span class="iso">CHF</span
+      ><span class="result">0</span>
+    </li>
+    <li class="ZAR">
+      <span class="name">South Africa Rand</span><span class="iso">ZAR</span
+      ><span class="result">0</span>
+    </li>
+    <li class="CAD">
+      <span class="name">Canadian Dollar</span><span class="iso">CAD</span
+      ><span class="result">0</span>
+    </li>
+  </ul>
+  <p class="warning">
+    <strong>Please note:</strong> The exchange rates given are 'bank rates'.
+    High street rates may be subject to commission
+  </p>
+</div>
