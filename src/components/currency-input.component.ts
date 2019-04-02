@@ -3,16 +3,15 @@ import {
   Input,
   forwardRef,
   ViewChild,
-  ElementRef
-} from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
+  ElementRef,
+  OnInit
+} from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
 @Component({
-  selector: 'currency-input',
+  selector: "currency-input",
   template: `
-    <input
-      #currencyInput
+    <input #currencyInput
       type="text"
       [min]="min"
       [max]="max"
@@ -22,7 +21,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       [autocomplete]="autocomplete"
       [autofocus]="autofocus"
       [value]="value"
-      (focusin)="currencyInput.setSelectionRange(symbol.length + 1, currencyInput.value.length)"
+      (click)="handleFocus()"
+      (focusin)="handleFocus()"
       (keydown)="asYouTypeDown($event.key)"
       (keyup)="asYouTypeUp()"
     />
@@ -35,7 +35,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     }
   ]
 })
-export class CurrencyInputComponent implements ControlValueAccessor {
+export class CurrencyInputComponent implements ControlValueAccessor, OnInit {
   @Input()
   autocomplete = false;
   @Input()
@@ -53,9 +53,9 @@ export class CurrencyInputComponent implements ControlValueAccessor {
   @Input()
   classList: string[];
   @Input()
-  symbol = 'USD';
+  symbol = "USD";
 
-  @ViewChild('currencyInput')
+  @ViewChild("currencyInput")
   _el: ElementRef<any>;
 
   private val: string;
@@ -94,11 +94,22 @@ export class CurrencyInputComponent implements ControlValueAccessor {
     return this._el.nativeElement as HTMLInputElement;
   }
 
+  ngOnInit() {
+    setTimeout(() => {
+      this.value = this.symbol + " " + this.value;
+      this.handleFocus();
+    }, 500);
+  }
+
+  handleFocus() {
+    this.el.setSelectionRange(this.value.length, this.value.length);
+  }
+
   asYouTypeDown(inputValue: string) {
     // apply rules
     const val = this.el.value;
-    if (val.indexOf('.') !== -1) {
-      const rhs = val.substring(val.indexOf('.'));
+    if (val.indexOf(".") !== -1) {
+      const rhs = val.substring(val.indexOf("."));
       if (rhs.length > 2) {
         if (!inputValue.match(/BACKSPACE/i)) {
           return false;
@@ -121,36 +132,29 @@ export class CurrencyInputComponent implements ControlValueAccessor {
   asYouTypeUp() {
     let val = this.el.value;
     // remember state before modification
-    const len0 = val.length;
-    const pos0 = this.el.selectionStart;
-
     // find decimal
-    if (val.indexOf('.') !== -1) {
-      const decimalPos = val.indexOf('.');
+    if (val.indexOf(".") !== -1) {
+      const decimalPos = val.indexOf(".");
       const lhs = val
         .substring(0, decimalPos)
-        .replace(/\D/g, '')
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        .replace(/\D/g, "")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       const rhs = val
         .substring(decimalPos)
-        .replace(/\D/g, '')
+        .replace(/\D/g, "")
         .substring(0, 2);
       // cannot add more than two digits
       if (rhs.length > 1) {
         return false;
       }
-      val = this.symbol + ' ' + lhs + '.' + rhs;
+      val = this.symbol + " " + lhs + "." + rhs;
     } else {
       val =
         this.symbol +
-        ' ' +
-        val.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        " " +
+        val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     // find decimal point
     this.value = val;
-    // find decimal point and put current before it
-    const len1 = val.length;
-    const pos1 = len1 - len0 + pos0;
-    this.el.setSelectionRange(pos1, pos1);
   }
 }

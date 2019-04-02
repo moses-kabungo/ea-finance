@@ -1,6 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
 import { Currency } from 'src/models/currency.model';
-import { CurrencyPipe } from '@angular/common';
 import { CurrencyInputComponent } from 'src/components';
 
 @Component({
@@ -62,5 +61,5 @@ export class AppComponent {
     return this._amount || '1';
   }
 
-  constructor(private currencyPipe: CurrencyPipe) {}
+  constructor() {}
 }
