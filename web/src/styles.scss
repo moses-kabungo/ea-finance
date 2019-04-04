@@ -57,7 +57,7 @@ input:focus {
 
 .currencies li {
   height: 40px;
-  background: #4162a9;
+  background: rgba(65, 98, 169, 0.9);
   margin-bottom: 5px;
   line-height: 40px;
   text-align: center;
@@ -112,7 +112,6 @@ input:focus {
 .result {
   width: 33.33%;
   float: left;
-  text-align: center;
 }
 
 .hide {
