@@ -4,19 +4,16 @@ const strftime = require("strftime");
 module.exports = ({ db }) => {
   rates.get("/", async (req, res, next) => {
     const { currencies, latest } = req.query;
-    let statement = "SELECT * FROM rates",
+    let statement = "SELECT tsp, base, target, rate FROM rates",
       params = [],
       client,
       done;
     if (currencies && currencies.length) {
       // currencies are in format BASE1:TARGET1:BASE2:TARGET2,...,BASEN:TARGETN
       const pairs = currencies.split(",").map(val => val.split(":"));
-      const hash = new Map(pairs);
 
       const baseArr = pairs.map(pair => pair[0]);
       const targetArr = pairs.map(pair => pair[1]);
-
-      console.log(baseArr, targetArr);
 
       statement +=
         " WHERE base IN (" +
@@ -26,7 +23,7 @@ module.exports = ({ db }) => {
           .map((_, i) => `$${i + baseArr.length + 1}`)
           .join(",") +
         ")";
-      params.push([...baseArr, ...targetArr].join(','));
+      params.push([...baseArr, ...targetArr]);
       // should include most recent only?
       if (latest && latest.match(/true/)) {
         statement += " GROUP BY id ORDER BY DATE(tsp) DESC";
@@ -38,15 +35,12 @@ module.exports = ({ db }) => {
       }
     }
 
-    console.log(params[0].split(','));
-    console.log(statement);
-
     try {
       const obj = await db.getClient();
       client = obj.client;
       done = obj.done;
       client.query("BEGIN");
-      const { rows } = await client.query(statement, params[0].split(','));
+      const { rows } = await client.query(statement, params[0]);
       await client.query("COMMIT");
       done();
       res.json(rows);
