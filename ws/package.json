@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "./node_modules/.bin/nodemon"
+  },
   "dependencies": {
     "body-parser": "^1.18.3",
     "db-migrate-pg": "^0.5.0",
@@ -12,5 +15,8 @@
     "request-body": "^1.2.5",
     "sqlstring": "^2.3.1",
     "strftime": "^0.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }

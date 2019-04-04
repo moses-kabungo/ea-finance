@@ -4,34 +4,70 @@ const strftime = require("strftime");
 module.exports = ({ db }) => {
   rates.get("/", async (req, res, next) => {
     const { currencies, latest } = req.query;
+
     let statement = "SELECT tsp, base, target, rate FROM rates",
-      params = [],
       client,
       done;
+
+    const options = { cache: {} };
+
+    // Define a lazily computed value
+    Object.defineProperty(options, "recent_date", {
+      set(promise) {
+        this.cache["recent_date"] = null;
+      },
+      async get() {
+        if (this.cache["recent_date"] != null) {
+          console.log("Using cache. Last date = %s", this.cache["recent_date"]);
+          return Promise.resolve(this.cache["recent_date"]);
+        }
+        try {
+          const {
+            rows: [row]
+          } = await db.query("SELECT DATE(MAX(tsp)) AS last_date FROM rates");
+          this.cache["recent_date"] = strftime("%F", row.last_date);
+          return Promise.resolve(this.cache["recent_date"]);
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      }
+    });
+
+    // Incrementally defined property
+    Object.defineProperty(options, "params", {
+      writable: true,
+      value: []
+    });
+
     if (currencies && currencies.length) {
       // currencies are in format BASE1:TARGET1:BASE2:TARGET2,...,BASEN:TARGETN
       const pairs = currencies.split(",").map(val => val.split(":"));
 
-      const baseArr = pairs.map(pair => pair[0]);
-      const targetArr = pairs.map(pair => pair[1]);
+      // We're converting to set in order to filter out duplicates.
+      const baseArr = new Set(pairs.map(pair => pair[0]));
+      const targetArr = new Set(pairs.map(pair => pair[1]));
+      const buildIn = (index0, indexN) =>
+        [...Array(indexN).keys()].map((_, i) => `$${index0 + i + 1}`).join(",");
 
+      // filter currencies
       statement +=
         " WHERE base IN (" +
-        [...Array(baseArr.length).keys()].map((_, i) => `$${i + 1}`).join(",") +
+        buildIn(0, baseArr.size) +
         ") AND target IN (" +
-        [...Array(targetArr.length).keys()]
-          .map((_, i) => `$${i + baseArr.length + 1}`)
-          .join(",") +
+        buildIn(baseArr.size, targetArr.size) +
         ")";
-      params.push([...baseArr, ...targetArr]);
+      // create params we're going to use in binding
+      options.params = [...baseArr, ...targetArr];
       // should include most recent only?
       if (latest && latest.match(/true/)) {
-        statement += " GROUP BY id ORDER BY DATE(tsp) DESC";
+        statement += ` AND DATE(tsp) = '${await options.recent_date}'`;
       }
     } else {
       // should include most recent only?
       if (latest && latest.match(/true/)) {
-        statement += " GROUP BY id ORDER BY DATE(tsp) DESC";
+        statement += ` WHERE DATE(tsp) = '${await options.recent_date}'`;
+      } else {
+        statement += " GROUP BY id ORDER BY date DESC";
       }
     }
 
@@ -40,7 +76,7 @@ module.exports = ({ db }) => {
       client = obj.client;
       done = obj.done;
       client.query("BEGIN");
-      const { rows } = await client.query(statement, params[0]);
+      const { rows } = await client.query(statement, options.params);
       await client.query("COMMIT");
       done();
       res.json(rows);
@@ -112,8 +148,11 @@ module.exports = ({ db }) => {
           )
         )
       );
-      // return rows
+
+      // commit the transaction
       await client.query("COMMIT");
+
+      // call done to release the database pool
       done();
       res.json({
         updates,
