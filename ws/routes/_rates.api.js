@@ -16,16 +16,19 @@ module.exports = ({ db }) => {
       set(promise) {
         this.cache["recent_date"] = null;
       },
+
       async get() {
         if (this.cache["recent_date"] != null) {
           console.log("Using cache. Last date = %s", this.cache["recent_date"]);
           return Promise.resolve(this.cache["recent_date"]);
         }
+
         try {
           const {
             rows: [row]
           } = await db.query("SELECT DATE(MAX(tsp)) AS last_date FROM rates");
           this.cache["recent_date"] = strftime("%F", row.last_date);
+
           return Promise.resolve(this.cache["recent_date"]);
         } catch (e) {
           return Promise.reject(e);
@@ -40,7 +43,7 @@ module.exports = ({ db }) => {
     });
 
     if (currencies && currencies.length) {
-      // currencies are in format BASE1:TARGET1:BASE2:TARGET2,...,BASEN:TARGETN
+      // currencies are in format Base1:Target1:Base2:Target2,...,BaseN:TargetN
       const pairs = currencies.split(",").map(val => val.split(":"));
 
       // We're converting to set in order to filter out duplicates.
@@ -56,13 +59,16 @@ module.exports = ({ db }) => {
         ") AND target IN (" +
         buildIn(baseArr.size, targetArr.size) +
         ")";
+
       // create params we're going to use in binding
       options.params = [...baseArr, ...targetArr];
+
       // should include most recent only?
       if (latest && latest.match(/true/)) {
         statement += ` AND DATE(tsp) = '${await options.recent_date}'`;
       }
     } else {
+
       // should include most recent only?
       if (latest && latest.match(/true/)) {
         statement += ` WHERE DATE(tsp) = '${await options.recent_date}'`;
@@ -75,6 +81,7 @@ module.exports = ({ db }) => {
       const obj = await db.getClient();
       client = obj.client;
       done = obj.done;
+
       client.query("BEGIN");
       const { rows } = await client.query(statement, options.params);
       await client.query("COMMIT");
@@ -110,8 +117,10 @@ module.exports = ({ db }) => {
       client = obj.client;
       done = obj.done;
       await client.query("BEGIN");
+
       // insert rates into the table
       const keys = Object.keys(data);
+
       // Accept daily changes or else ignore
       const updates = await combine("rows")(
         Promise.all(
@@ -128,6 +137,7 @@ module.exports = ({ db }) => {
           )
         )
       );
+
       // Insert first timers
       const insertions = await combine("rows")(
         Promise.all(
