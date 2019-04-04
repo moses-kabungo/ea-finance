@@ -26,19 +26,19 @@ const server = http.createServer(app);
 server.on("listening", () => {
   console.time("up time");
   console.log(
-    "Application is listening on port %s. Press [Q|q] to quit...",
+    "Application is listening on port %s...",
     app.get("PORT")
   );
 });
 
 server.listen(app.get("PORT"));
 
-process.stdin.setRawMode(true);
-process.stdin.resume();
-process.stdin.on("data", data => {
-  data = data.toString("utf8");
-  if (data && data.match(/q/i)) {
-    console.timeEnd("up time");
-    process.exit(0);
-  }
-});
+// process.stdin.setRawMode(true);
+// process.stdin.resume();
+// process.stdin.on("data", data => {
+//   data = data.toString("utf8");
+//   if (data && data.match(/q/i)) {
+//     console.timeEnd("up time");
+//     process.exit(0);
+//   }
+// });
