@@ -55,7 +55,7 @@ export class CurrencyInputComponent implements ControlValueAccessor, OnInit {
   @Input()
   symbol = 'USD';
 
-  @ViewChild('currencyInput')
+  @ViewChild('currencyInput', { static: true })
   _el: ElementRef<any>;
 
   private val: string;

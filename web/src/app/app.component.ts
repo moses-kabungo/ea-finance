@@ -40,7 +40,7 @@ export class AppComponent {
     }
   ];
 
-  @ViewChild(CurrencyInputComponent)
+  @ViewChild(CurrencyInputComponent, { static: true })
   currencyInput: CurrencyInputComponent;
 
   currentSelection: Currency = this.currencies[0];
